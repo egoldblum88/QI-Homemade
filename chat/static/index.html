@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Our AI</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>OUR AI</h1>
+          <p class="subtitle" id="model-info">Loading the model&hellip;</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="memory-btn" class="btn-secondary" type="button" aria-expanded="false" aria-controls="memory-panel"
+                title="What is stored in long-term memory">Memory <span id="memory-count" class="count">0</span></button>
+        <button id="knowledge-btn" class="btn-secondary" type="button" aria-expanded="false" aria-controls="knowledge-panel"
+                title="What was learned from your conversations">Knowledge <span id="knowledge-count" class="count">0</span></button>
+        <button id="world-btn" class="btn-secondary" type="button" aria-expanded="false" aria-controls="world-panel"
+                title="The world model: entities, relationships, and how answers were reasoned">World <span id="world-count" class="count">0</span></button>
+        <button id="self-btn" class="btn-secondary" type="button" aria-expanded="false" aria-controls="self-panel"
+                title="The self-model: the system's own recorded state and history, with evidence">Self <span id="self-count" class="count">0</span></button>
+        <button id="state-btn" class="btn-secondary" type="button" aria-expanded="false" aria-controls="state-panel"
+                title="The internal state: numbers computed from verified events, with their causes">State</button>
+        <button id="theme-btn" class="icon-btn" type="button" title="Switch light / dark" aria-label="Switch light or dark appearance">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/>
+          </svg>
+        </button>
+        <button id="clear-btn" class="btn-secondary" type="button">Clear</button>
+      </div>
+    </header>
+
+    <main id="messages" class="messages" aria-live="polite"></main>
+
+    <form id="composer" class="composer" autocomplete="off">
+      <textarea id="input" rows="1" maxlength="500" placeholder="Type a message&hellip;" aria-label="Message"></textarea>
+      <button id="send-btn" class="send" type="submit" disabled>Send</button>
+    </form>
+    <p class="hint">Enter to send &middot; Shift+Enter for a new line &middot; Runs only on this Mac</p>
+  </div>
+
+  <aside id="memory-panel" class="memory-panel" hidden aria-label="Long-term memory">
+    <div class="memory-head">
+      <div>
+        <h2>Memory</h2>
+        <p class="memory-sub" id="memory-sub">Only things you told it, saved on this Mac. Nothing here was written by the model.</p>
+      </div>
+      <button id="memory-close" class="icon-btn" type="button" aria-label="Close the memory panel">&times;</button>
+    </div>
+    <div id="memory-list" class="memory-list"></div>
+    <div class="memory-foot">
+      <p class="memory-sub" id="history-info"></p>
+      <div class="memory-buttons">
+        <button id="memory-clear" class="btn-secondary danger" type="button">Clear all memories</button>
+        <button id="history-clear" class="btn-secondary" type="button">Delete conversation history</button>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="knowledge-panel" class="memory-panel" hidden aria-label="Learned knowledge">
+    <div class="memory-head">
+      <div>
+        <h2>Knowledge</h2>
+        <p class="memory-sub">What was learned from what you said: current values only are used. Nothing here was
+          learned from the model's own replies, and nothing was preloaded.</p>
+      </div>
+      <button id="knowledge-close" class="icon-btn" type="button" aria-label="Close the knowledge panel">&times;</button>
+    </div>
+    <div id="knowledge-list" class="memory-list"></div>
+    <div class="memory-foot">
+      <p class="memory-sub" id="knowledge-info"></p>
+      <div class="memory-buttons">
+        <button id="knowledge-clear" class="btn-secondary danger" type="button">Clear all knowledge</button>
+      </div>
+    </div>
+  </aside>
+  <aside id="world-panel" class="memory-panel" hidden aria-label="World knowledge and reasoning">
+    <div class="memory-head">
+      <div>
+        <h2>World &amp; reasoning</h2>
+        <p class="memory-sub">What is known, as entities and relationships, built from what you said. Reasoning
+          answers from it with simple operations; the brain only writes the words.</p>
+      </div>
+      <button id="world-close" class="icon-btn" type="button" aria-label="Close the world panel">&times;</button>
+    </div>
+    <form id="world-try" class="world-try" autocomplete="off">
+      <input id="world-question" type="text" maxlength="300" placeholder="Try a question (reasoning only, no reply)&hellip;"
+             aria-label="A question for the reasoning layer">
+      <button class="btn-secondary" type="submit">Reason</button>
+    </form>
+    <div id="world-list" class="memory-list"></div>
+    <div class="memory-foot">
+      <p class="memory-sub" id="world-info"></p>
+    </div>
+  </aside>
+  <aside id="self-panel" class="memory-panel" hidden aria-label="Self-model and event log">
+    <div class="memory-head">
+      <div>
+        <h2>Self-model</h2>
+        <p class="memory-sub">The system's own recorded state, actions, results and history, computed from the event
+          log and the stores. Every line shows its evidence. Nothing here says what the system is, and none of it is
+          shown to the brain.</p>
+      </div>
+      <button id="self-close" class="icon-btn" type="button" aria-label="Close the self-model panel">&times;</button>
+    </div>
+    <form id="self-try" class="world-try" autocomplete="off">
+      <input id="self-question" type="text" maxlength="300" placeholder="Ask about recorded state, e.g. What did you learn recently?"
+             aria-label="A question about the system's recorded state">
+      <button class="btn-secondary" type="submit">Ask</button>
+    </form>
+    <div id="self-list" class="memory-list"></div>
+    <div class="memory-foot">
+      <p class="memory-sub" id="self-info"></p>
+      <div class="memory-buttons">
+        <button id="self-clear" class="btn-secondary danger" type="button">Clear the event log</button>
+      </div>
+    </div>
+  </aside>
+  <aside id="state-panel" class="memory-panel" hidden aria-label="Internal state">
+    <div class="memory-head">
+      <div>
+        <h2>Internal state</h2>
+        <p class="memory-sub">Numbers computed from verified events (never from reply text). They set how fast the
+          expectations learn and which memories are tagged as significant; changing memory importance and recall order
+          is experimental and off unless the server was started with --state-memory-effects. They are not feelings,
+          and none of it is shown to the brain.</p>
+      </div>
+      <button id="state-close" class="icon-btn" type="button" aria-label="Close the internal state panel">&times;</button>
+    </div>
+    <div id="state-list" class="memory-list"></div>
+    <div class="memory-foot">
+      <p class="memory-sub" id="state-info"></p>
+      <div class="memory-buttons">
+        <button id="state-reset-baselines" class="btn-secondary" type="button">Reset baselines</button>
+        <button id="state-reset-all" class="btn-secondary danger" type="button">Reset everything</button>
+      </div>
+    </div>
+  </aside>
+  <script src="/static/app.js"></script>
+</body>
+</html>
